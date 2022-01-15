@@ -1,0 +1,41 @@
+version: '3'
+services:
+  checkout_backend:
+    build: .
+    image: antoniopapa/checkout:0.0.1
+    command: 'npm start'
+    ports:
+      - "8004:8000"
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: checkout-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: checkout_topic
+      DB_HOST:
+      DB_PORT: 3306
+      DB_DATABASE: checkout
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      STRIPE_SECRET:
+      CHECKOUT_URL: http://localhost:5000
+
+  checkout_consumer:
+    build: .
+    image: antoniopapa/checkout:0.0.1
+    command: 'npm run consume'
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: checkout-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: checkout_topic
+      DB_HOST:
+      DB_PORT: 3306
+      DB_DATABASE: checkout
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      STRIPE_SECRET:
+      CHECKOUT_URL: http://localhost:5000

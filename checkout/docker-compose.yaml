@@ -1,0 +1,65 @@
+version: '3.9'
+services:
+  checkout_backend:
+    build: .
+    command: 'npm start'
+    ports:
+      - "8004:8000"
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: checkout-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: checkout_topic
+      DB_HOST: checkout_db
+      DB_PORT: 3306
+      DB_DATABASE: checkout
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      STRIPE_SECRET:
+      CHECKOUT_URL: http://localhost:5000
+    volumes:
+      - .:/app
+    depends_on:
+      - checkout_db
+    networks:
+      - checkout
+      - users
+
+  checkout_consumer:
+    build: .
+    command: 'npm run consume'
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: checkout-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: checkout_topic
+      DB_HOST: checkout_db
+      DB_PORT: 3306
+      DB_DATABASE: checkout
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      - checkout_db
+    networks:
+      - checkout
+
+  checkout_db:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: checkout
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbdata:/var/lib/mysql
+    networks:
+      - checkout
+
+networks:
+  checkout:
+  users:
+    external: true

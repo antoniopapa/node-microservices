@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: admin-backend
+  name: admin-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: admin-backend
+  template:
+    metadata:
+      labels:
+        io.kompose.service: admin-backend
+    spec:
+      containers:
+        - args:
+            - npm
+            - start
+          env:
+            - name: DB_DATABASE
+              value: admin
+            - name: DB_HOST
+              value:
+            - name: DB_PASSWORD
+              value: root
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USERNAME
+              value: root
+            - name: KAFKA_BROKERS
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT
+              value: admin-consumer
+            - name: KAFKA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_PASSWORD
+            - name: KAFKA_TOPIC
+              value: admin_topic
+            - name: KAFKA_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_USERNAME
+            - name: USERS_MS
+              value: http://users_ms:8000
+          image: antoniopapa/admin:0.0.1
+          name: admin-backend
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: admin-consumer
+  name: admin-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: admin-consumer
+  template:
+    metadata:
+      labels:
+        io.kompose.service: admin-consumer
+    spec:
+      containers:
+        - args:
+            - npm
+            - run
+            - consume
+          env:
+            - name: DB_DATABASE
+              value: admin
+            - name: DB_HOST
+              value:
+            - name: DB_PASSWORD
+              value: root
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_USERNAME
+              value: root
+            - name: KAFKA_BROKERS
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_BROKERS
+            - name: KAFKA_CLIENT
+              value: admin-consumer
+            - name: KAFKA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_PASSWORD
+            - name: KAFKA_TOPIC
+              value: admin_topic
+            - name: KAFKA_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-secrets
+                  key: KAFKA_USERNAME
+            - name: USERS_MS
+              value: http://users_ms:8000
+          image: antoniopapa/admin:0.0.1
+          name: admin-consumer
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    io.kompose.service: admin-backend
+  name: admin-backend
+spec:
+  ports:
+    - name: "8002"
+      port: 8002
+      targetPort: 8000
+  selector:
+    io.kompose.service: admin-backend
+
+

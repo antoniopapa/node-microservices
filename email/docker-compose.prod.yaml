@@ -1,0 +1,14 @@
+version: '3'
+services:
+  email_backend:
+    build: .
+    image: antoniopapa/email:0.0.1
+    environment:
+      KAFKA_CLIENT: email-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      MAIL_HOST:
+      MAIL_PORT:
+      MAIL_USERNAME:
+      MAIL_PASSWORD:

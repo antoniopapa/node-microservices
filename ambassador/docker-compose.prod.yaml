@@ -1,0 +1,42 @@
+version: '3'
+services:
+  ambassador_backend:
+    build: .
+    image: antoniopapa/ambassador:0.0.1
+    command: 'npm start'
+    ports:
+      - "8003:8000"
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: ambassador-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: ambassador_topic
+      DB_HOST:
+      DB_PORT: 3306
+      DB_DATABASE: ambassador
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  ambassador_consumer:
+    build: .
+    image: antoniopapa/ambassador:0.0.1
+    command: 'npm run consume'
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: ambassador-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: ambassador_topic
+      DB_HOST:
+      DB_PORT: 3306
+      DB_DATABASE: ambassador
+      DB_USERNAME: root
+      DB_PASSWORD: root
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"

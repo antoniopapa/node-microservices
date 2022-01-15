@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  users_backend:
+    build: .
+    container_name: users_ms
+    environment:
+      DB_HOST: users_db
+      DB_PORT: 3306
+      DB_DATABASE: users
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    volumes:
+      - .:/app
+    depends_on:
+      - users_db
+    networks:
+      - users
+
+  users_db:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: users
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbdata:/var/lib/mysql
+    networks:
+      - users
+
+networks:
+  users:
+    name: users

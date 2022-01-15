@@ -1,0 +1,71 @@
+version: '3.9'
+services:
+  ambassador_backend:
+    build: .
+    command: 'npm start'
+    ports:
+      - "8003:8000"
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: ambassador-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: ambassador_topic
+      DB_HOST: ambassador_db
+      DB_PORT: 3306
+      DB_DATABASE: ambassador
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    volumes:
+      - .:/app
+    depends_on:
+      - ambassador_db
+      - redis
+    networks:
+      - ambassador
+      - users
+
+  ambassador_consumer:
+    build: .
+    command: 'npm run consume'
+    environment:
+      USERS_MS: http://users_ms:8000
+      KAFKA_CLIENT: ambassador-consumer
+      KAFKA_BROKERS:
+      KAFKA_USERNAME:
+      KAFKA_PASSWORD:
+      KAFKA_TOPIC: ambassador_topic
+      DB_HOST: ambassador_db
+      DB_PORT: 3306
+      DB_DATABASE: ambassador
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      - ambassador_db
+    networks:
+      - ambassador
+
+  ambassador_db:
+    image: mysql:8
+    #    platform: linux/x86_64 #for m1 chip macs
+    restart: always
+    environment:
+      MYSQL_DATABASE: ambassador
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - .dbdata:/var/lib/mysql
+    networks:
+      - ambassador
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - ambassador
+
+networks:
+  ambassador:
+  users:
+    external: true
